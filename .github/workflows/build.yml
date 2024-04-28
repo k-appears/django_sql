@@ -1,0 +1,41 @@
+#file: noinspection YAMLSchemaValidation
+name: Build Django App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-app:
+    name: Build App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python Poetry Action
+        uses: abatilo/actions-poetry@v2.1.6
+        with:
+          poetry-version: 1.5.1
+      - name: Build application
+        run: |
+          poetry install
+      - name: Format code with Black
+        run: |
+          poetry run black .
+      - name: Lint code with Flake8
+        run: |
+          poetry run flake8
+      - name: Type check with MyPy
+        run: |
+          poetry run mypy .
+      - name: Run tests
+        run: |
+          poetry run pytest

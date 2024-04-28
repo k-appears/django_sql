@@ -169,8 +169,8 @@ def test_get_details(setup_test_data):
     client = APIClient()
     response = client.get(url)
     assert response.status_code == HTTP_200_OK
-
-    assert response.data["machine"] == {"id": 1, "description": "Machine 1"}
+    assert isinstance(response.data, dict)
+    assert response.data.get("machine") == {"id": 1, "description": "Machine 1"}
     assert response.data["name_description"] == "Simulation 1"
     assert response.data["status"] == "running"
 

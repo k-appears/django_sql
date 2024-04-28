@@ -7,10 +7,10 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
-from rest_framework import generics, serializers, views  # type: ignore
-from rest_framework.request import Request  # type: ignore
-from rest_framework.response import Response  # type: ignore
-from rest_framework.status import (  # type: ignore
+from rest_framework import generics, serializers, views
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
@@ -52,7 +52,7 @@ from .serializers import (
         responses={HTTP_201_CREATED: SimulationSerializer},
     ),
 )
-class SimulationCreateListView(generics.ListAPIView, generics.CreateAPIView):  # type: ignore
+class SimulationCreateListView(generics.ListAPIView, generics.CreateAPIView):
     serializer_class = SimulationSerializer
 
     def get_queryset(self) -> list[Simulation]:
@@ -70,30 +70,28 @@ class SimulationCreateListView(generics.ListAPIView, generics.CreateAPIView):  #
     def post(self, request: Request, *args: list[Any], **kwargs: dict[str, Any]) -> Response:
         serializer = SimulationCreateSerializer(data=request.data)
         if serializer.is_valid():
-            machine = Machine.get_details(machined_id=request.data.get("machine_id"))
-            if not machine:
-                return Response(status=HTTP_400_BAD_REQUEST, data={"message": "Machine not found"})
-            saved = serializer.save(machine=machine)
-            return Response(SimulationSerializer(saved).data, status=HTTP_201_CREATED)
+            if machine := Machine.get_details(machined_id=serializer.validated_data["machine_id"]):
+                saved = serializer.save(machine=machine)
+                return Response(SimulationSerializer(saved).data, status=HTTP_201_CREATED)
+            return Response(status=HTTP_400_BAD_REQUEST, data={"message": "Machine not found"})
 
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
-class SimulationDetailsView(views.APIView):  # type: ignore
+class SimulationDetailsView(views.APIView):
     @extend_schema(
         summary="Get Simulation Details",
         description="Get details of a simulation by its ID",
         responses={HTTP_200_OK: SimulationSerializer},
     )
-    def get(self, request: Request, simulation_id: int) -> Response:
-        simulation = Simulation.get_details(simulation_id)
-        if simulation:
+    def get(self, _: Request, simulation_id: int) -> Response:
+        if simulation := Simulation.get_details(simulation_id):
             serializer = SimulationSerializer(simulation)
             return Response(serializer.data)
         return Response(status=HTTP_404_NOT_FOUND)
 
 
-class MachineListView(views.APIView):  # type: ignore
+class MachineListView(views.APIView):
     """
     List all machines
     """

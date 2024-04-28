@@ -51,8 +51,8 @@ Controller aspects, DRF facilitating the creation of RESTful APIs and Swagger AP
 #### Steps
 
 ``` bash
-docker build -t django-manuel-ch .
-docker run -p 8000:8000 django-manuel-ch
+docker build -t django-kata .
+docker run -p 8000:8000 django-kata
 ```
 
 Finally, open http://localhost:8000/ to open Swagger API.

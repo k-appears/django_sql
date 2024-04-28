@@ -83,6 +83,9 @@ def test_filter_simulations_by_status(setup_test_data):
 )
 def test_order_by(setup_test_data, order_field, expected_simulation_id):
     simulations_ordered_by_name = list(Simulation.order_by_field("name_description"))
+    assert isinstance(simulations_ordered_by_name, list)
+    assert isinstance(simulations_ordered_by_name[0], Simulation)
+    assert hasattr(simulations_ordered_by_name[0], "id")
     assert simulations_ordered_by_name[0].id == expected_simulation_id
 
 
@@ -102,7 +105,9 @@ def test_filter_error(setup_test_data):
 @pytest.mark.django_db
 def test_get_details_db(setup_test_data):
     simulation = Simulation.get_details(simulation_id=1)
+    assert isinstance(simulation, Simulation)
     assert simulation.name_description == "Simulation name 1"
+    assert isinstance(simulation.graph_data, dict)
     assert simulation.graph_data["data"][0] == {"seconds": 10, "loss": 0.8}
 
 
@@ -120,8 +125,10 @@ def test_get_details(mocker):
     simulation = mocker.Mock(**simulation_data)
     mocker.patch.object(Simulation.objects, "raw", return_value=[simulation])
     found_simulation = Simulation.get_details(simulation_id=1)
+    assert found_simulation
     assert found_simulation.name_description == simulation_data["name_description"]
     assert found_simulation.graph_data == simulation_data["graph_data"]
+    assert found_simulation.machine
     assert found_simulation.machine.description == simulation_data["ma_description"]
 
 
@@ -145,7 +152,9 @@ def test_get_machine(mocker):
     machine = mocker.Mock(**machine_data)
     mocker.patch.object(Machine.objects, "raw", return_value=[machine])
     found_machine = Machine.get_details(machine_id)
+    assert found_machine
     assert found_machine.description == machine_data["description"]
+    assert hasattr(found_machine, "id")
     assert found_machine.id == machine_data["id"]
     Machine.objects.raw.assert_called_once_with(
         "SELECT id, description FROM app_machine WHERE id = %s",

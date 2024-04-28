@@ -1,29 +1,35 @@
-from typing import Any, List, Optional, TypeVar
+from typing import List, Optional, TypeVar
 
 from django.db import connection, models
 from django.db.models import Model
 from django.db.models.query import QuerySet
+from django.db.models.base import ModelBase
+from abc import ABCMeta
 
-_T = TypeVar("_T", bound=Model, covariant=True)
+ModelT = TypeVar("ModelT", bound=Model)
 
 
-class Unmanaged(models.Model):
+class ABCModelMeta(ModelBase, ABCMeta):
+    pass
+
+
+class Unmanaged(models.Model, metaclass=ABCModelMeta):
     class Meta:
         abstract = True
         managed = False
 
 
-class RestrictedManager(models.Manager[_T]):
-    def get_queryset(self) -> QuerySet[_T]:
+class RestrictedManager(models.Manager[ModelT]):
+    def get_queryset(self) -> QuerySet[ModelT]:
         return super().get_queryset()
 
-    def all(self) -> QuerySet[_T]:
+    def all(self) -> QuerySet[ModelT]:
         raise NotImplementedError("Do use ORM to query objects")
 
-    def get(self, *args: Any, **kwargs: Any) -> _T:
+    def get(self, *args: tuple[int | str], **kwargs: dict[str, str | int]) -> ModelT:
         raise NotImplementedError("Do use ORM to query objects")
 
-    def filter(self, *args: Any, **kwargs: Any) -> QuerySet[_T]:
+    def filter(self, *args: tuple[int | str], **kwargs: dict[str, str | int]) -> QuerySet[ModelT]:
         raise NotImplementedError("Do use ORM to query objects")
 
 
@@ -73,13 +79,14 @@ class Simulation(Unmanaged, RestrictedManager["Simulation"]):
         if field in valid_fields:
             with connection.cursor() as cursor:
                 cursor.execute(f"SELECT * FROM app_simulation ORDER BY {field}")
+                if not cursor.description:
+                    return []
                 simulations = [
                     Simulation(**{cursor.description[i][0]: value for i, value in enumerate(row)})
                     for row in cursor.fetchall()
                 ]
                 return simulations
-        else:
-            raise ValueError("Invalid field for ordering simulations.")
+        raise ValueError("Invalid field for ordering simulations.")
 
     @staticmethod
     def list() -> list["Simulation"]:
