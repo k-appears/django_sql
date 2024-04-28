@@ -1,0 +1,10 @@
+# Pycharm
+**/.idea/
+**/__pycache__/
+/.pytest_cache/
+.venv/
+
+db.sqlite3
+
+staticfiles
+.coverage

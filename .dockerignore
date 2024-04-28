@@ -1,0 +1,7 @@
+**/__pycache__
+*.log
+temp/
+
+.pytest_cache
+**/.idea
+.github

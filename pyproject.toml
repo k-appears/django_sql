@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "Origen.ai - Backend technical test 2022"
+version = "0.1.0"
+description = ""
+authors = ["Manuel Chamber <tiulangel@gmai.com>"]
+readme = "README.md"
+packages = [{ include = "*", from = "./" }]
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+gunicorn = "^21.2.0"
+django = "^5.0"
+django-environ = "^0.11.2"
+djangorestframework = "^3.15.1"
+drf-spectacular = "^0.27.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest-django = "^4.7.0"
+pytest-mock = "^3.12.0"
+mypy = "^1.8.0"
+pre-commit = "^3.6.2"
+flake8 = "^7.0.0"
+black = "^24.2.0"
+coverage = "^7.4.2"
+django-stubs = "^4.2.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "app.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+log_cli = true
+log_cli_level = "INFO"
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+exclude = '''
+/(
+    \.git
+    | \.venv
+    | \.*migrations.*
+)/
+'''
+
+[tool.isort]
+profile = "black"
+src_paths = ["app"]
+skip = ["app/migrations/*.py"]
+
+[tool.mypy]
+check_untyped_defs = true
+plugins = ["mypy_django_plugin.main"]
+strict = true
+exclude = ["^.*test_.*\\.py$", "^.*conftest\\.py$", "app/migrations/.*\\.py$"]
+
+[tool.django-stubs]
+django_settings_module = "app.settings"
+
+
+[virtualenvs]
+in-project = true
